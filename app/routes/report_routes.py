@@ -1,10 +1,12 @@
 from fastapi import APIRouter, HTTPException
 
 from app.schemas.report import (
+    GenerateMarkdownReportOutput,
     GenerateRawReportInput,
-    GenerateReportOutput,
 )
-from app.services.openai_service import generate_raw_report
+from app.services.openai_service import generate_markdown_report
+from app.utils.file_name import generate_report_file_name
+from app.errors.report_errors import EmptyReportContentError
 
 
 router = APIRouter(
@@ -13,12 +15,22 @@ router = APIRouter(
 )
 
 
-@router.post("/fleet", response_model=GenerateReportOutput)
+@router.post("/fleet", response_model=GenerateMarkdownReportOutput)
 def create_fleet_report(data: GenerateRawReportInput):
     try:
-        report = generate_raw_report(data)
+        markdown_content = generate_markdown_report(data)
+        file_name = generate_report_file_name(data.period)
 
-        return GenerateReportOutput(report=report)
+        return GenerateMarkdownReportOutput(
+            file_name=file_name,
+            content_type="text/markdown",
+            markdown_content=markdown_content,
+        )
+    except EmptyReportContentError as error:
+        raise HTTPException(
+            status_code=502,
+            detail=str(error),
+        )
 
     except Exception as error:
         raise HTTPException(

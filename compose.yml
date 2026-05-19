@@ -1,0 +1,18 @@
+services:
+  ai-report-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-report-service
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8001:8001"
+    networks:
+      - sif-net-dev
+
+networks:
+  sif-net-dev:
+    external: true
+    name: core-service_sif-net-dev
