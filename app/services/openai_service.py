@@ -4,6 +4,7 @@ from openai import OpenAI
 
 from app.config import settings
 from app.schemas.report import GenerateRawReportInput
+from app.errors.report_errors import EmptyReportContentError
 
 
 client = OpenAI(api_key=settings.openai_api_key)
@@ -20,20 +21,24 @@ Esses dados podem incluir usuários, veículos, requisições e rotas/viagens.
 
 No contexto deste sistema:
 - "requests" representam solicitações de uso de veículos.
-- "routes" representam registros de execução/acompanhamento dessas solicitações, contendo status, descrição, data de início e data de finalização.
+- "routes" representam registros de execução/acompanhamento dessas solicitações.
 - Cada route possui um request_id que aponta para a request relacionada.
 
-Seu objetivo é gerar um relatório administrativo claro, útil e confiável para um administrador.
+Sua tarefa é gerar um relatório administrativo em formato Markdown.
 
 Regras obrigatórias:
+- Retorne somente o conteúdo Markdown do relatório.
+- Não coloque o Markdown dentro de bloco de código.
+- Não retorne JSON.
 - Use somente os dados enviados.
 - Não invente números, nomes, datas, usuários, veículos, rotas ou departamentos.
 - Não exponha nem solicite dados sensíveis.
 - Não assuma informações que não estejam presentes no JSON.
 - Caso faltem dados para alguma análise, diga claramente que os dados são insuficientes.
 - Escreva em português do Brasil.
-- Organize o relatório com seções.
-- Destaque padrões relevantes, problemas recorrentes e possíveis pontos de atenção.
+- Organize o relatório com títulos e subtítulos Markdown.
+- Use tabelas Markdown quando ajudar a leitura.
+- Use listas quando fizer sentido.
 - Gere recomendações apenas quando elas forem sustentadas pelos dados enviados.
 
 O relatório deve conter, quando possível:
@@ -54,7 +59,7 @@ Dados recebidos em JSON:
 """
 
 
-def generate_raw_report(data: GenerateRawReportInput) -> str:
+def generate_markdown_report(data: GenerateRawReportInput) -> str:
     prompt = build_raw_report_prompt(data)
 
     response = client.responses.create(
@@ -62,4 +67,9 @@ def generate_raw_report(data: GenerateRawReportInput) -> str:
         input=prompt,
     )
 
-    return response.output_text
+    markdown_content = response.output_text
+
+    if not markdown_content or not markdown_content.strip():
+        raise EmptyReportContentError()
+
+    return markdown_content.strip()

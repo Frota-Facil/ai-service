@@ -63,5 +63,7 @@ class GenerateRawReportInput(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
-class GenerateReportOutput(BaseModel):
-    report: str
+class GenerateMarkdownReportOutput(BaseModel):
+    file_name: str
+    content_type: str = "text/markdown"
+    markdown_content: str
