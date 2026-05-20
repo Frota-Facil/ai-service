@@ -4,11 +4,6 @@ from typing import Any, List, Optional
 from pydantic import BaseModel, Field
 
 
-class ReportPeriod(BaseModel):
-    start: Optional[datetime] = None
-    end: Optional[datetime] = None
-
-
 class ReportUser(BaseModel):
     id: str
     name: Optional[str] = None
@@ -26,17 +21,6 @@ class ReportVehicle(BaseModel):
     type: Optional[str] = None
 
 
-class ReportRoute(BaseModel):
-    id: str
-    request_id: str
-    status: Optional[str] = None
-    description: Optional[str] = None
-    started_at: Optional[datetime] = None
-    finished_at: Optional[datetime] = None
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-
-
 class ReportRequest(BaseModel):
     id: str
     user_id: Optional[str] = None
@@ -50,20 +34,36 @@ class ReportRequest(BaseModel):
     updated_at: Optional[datetime] = None
 
 
-class GenerateRawReportInput(BaseModel):
-    period: Optional[ReportPeriod] = None
+class ReportRoute(BaseModel):
+    id: str
+    request_id: str
+    status: Optional[str] = None
+    description: Optional[str] = None
+    started_at: Optional[datetime] = None
+    finished_at: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
-    users: List[ReportUser] = Field(default_factory=list)
-    vehicles: List[ReportVehicle] = Field(default_factory=list)
-    routes: List[ReportRoute] = Field(default_factory=list)
-    requests: List[ReportRequest] = Field(default_factory=list)
+
+class ReportTrack(BaseModel):
+    id: str
+    route_id: str
+    x_coordinate: int
+    y_coordinate: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
+class GenerateRouteReportInput(BaseModel):
+    route: ReportRoute
+    request: Optional[ReportRequest] = None
+    vehicle: Optional[ReportVehicle] = None
+    user: Optional[ReportUser] = None
+    tracks: List[ReportTrack] = Field(default_factory=list)
 
     extra_context: Optional[str] = None
-
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
-class GenerateMarkdownReportOutput(BaseModel):
-    file_name: str
-    content_type: str = "text/markdown"
+class GenerateRouteReportOutput(BaseModel):
     markdown_content: str

@@ -1,12 +1,11 @@
 from fastapi import APIRouter, HTTPException
 
-from app.schemas.report import (
-    GenerateMarkdownReportOutput,
-    GenerateRawReportInput,
-)
-from app.services.openai_service import generate_markdown_report
-from app.utils.file_name import generate_report_file_name
 from app.errors.report_errors import EmptyReportContentError
+from app.schemas.report import (
+    GenerateRouteReportInput,
+    GenerateRouteReportOutput,
+)
+from app.services.openai_service import generate_route_report
 
 
 router = APIRouter(
@@ -15,17 +14,15 @@ router = APIRouter(
 )
 
 
-@router.post("/fleet", response_model=GenerateMarkdownReportOutput)
-def create_fleet_report(data: GenerateRawReportInput):
+@router.post("/routes", response_model=GenerateRouteReportOutput)
+def create_route_report(data: GenerateRouteReportInput):
     try:
-        markdown_content = generate_markdown_report(data)
-        file_name = generate_report_file_name(data.period)
+        markdown_content = generate_route_report(data)
 
-        return GenerateMarkdownReportOutput(
-            file_name=file_name,
-            content_type="text/markdown",
+        return GenerateRouteReportOutput(
             markdown_content=markdown_content,
         )
+
     except EmptyReportContentError as error:
         raise HTTPException(
             status_code=502,
@@ -35,5 +32,5 @@ def create_fleet_report(data: GenerateRawReportInput):
     except Exception as error:
         raise HTTPException(
             status_code=500,
-            detail=f"Erro ao gerar relatório: {str(error)}",
+            detail=f"Erro ao gerar relatório da rota: {str(error)}",
         )
