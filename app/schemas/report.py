@@ -21,6 +21,29 @@ class ReportVehicle(BaseModel):
     type: Optional[str] = None
 
 
+class ReportRoute(BaseModel):
+    id: str
+    request_id: str
+    status: Optional[str] = None
+    description: Optional[str] = None
+    started_at: Optional[datetime] = None
+    finished_at: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
+class ReportTrack(BaseModel):
+    id: str
+    route_id: str
+    latitude: float
+    longitude: float
+    captured_at: datetime
+    image_url: Optional[str] = None
+    image_key: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
 class ReportRequest(BaseModel):
     id: str
     user_id: Optional[str] = None
