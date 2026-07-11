@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from app.errors.report_errors import EmptyReportContentError
+from app.errors.report_errors import EmptyReportContentError, ReportGenerationError
 from app.schemas.report import (
     GenerateRouteReportInput,
     GenerateRouteReportOutput,
@@ -27,10 +27,16 @@ def create_route_report(data: GenerateRouteReportInput):
         raise HTTPException(
             status_code=502,
             detail=str(error),
-        )
+        ) from error
+
+    except ReportGenerationError as error:
+        raise HTTPException(
+            status_code=502,
+            detail=str(error),
+        ) from error
 
     except Exception as error:
         raise HTTPException(
             status_code=500,
-            detail=f"Erro ao gerar relatório da rota: {str(error)}",
-        )
+            detail="Erro interno ao gerar relatório da rota.",
+        ) from error
